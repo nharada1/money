@@ -10,6 +10,8 @@ class FlightAPI(Resource):
         self.reqparse.add_argument('flight_id', type=str, location='json')
         super(FlightAPI, self).__init__()
 
-    def get(self, id):
+    def post(self):
         args = self.reqparse.parse_args()
-        result = db.get_flight(id)
+        new_id = db.new_flight(args['flight_id'])
+        return {'id': new_id}
+
