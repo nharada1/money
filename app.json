@@ -1,0 +1,12 @@
+{
+    "name": "money-backend",
+    "description": "Money 20/20 Hackathon",
+    "repository": "https://github.com/nharada1/money",
+    "addons": ["mongolab"],
+    "env": {
+        "ON_HEROKU": {
+            "description": "Should be True on Heroku",
+            "value": "True"
+        }
+    }
+}
