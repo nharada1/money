@@ -23,15 +23,15 @@ class MongoDB():
 
     def new_user(self, user, hashed_pass):
         new_wallet = createwallet.create_wallet(hashed_pass, os.environ.get('BLOCKCHAIN_KEY'))
-        data = {'username': user, 'password': hashed_pass, 'wallet': new_wallet.address}
+        data = {'username': user, 'password': hashed_pass, 'wallet': new_wallet.address, 'guid': new_wallet.identifier}
         self.users.insert_one(data)
-        data = {'username': user, 'password': hashed_pass, 'wallet': new_wallet.address}
+        data = {'username': user, 'password': hashed_pass, 'wallet': new_wallet.address, 'guid': new_wallet.identifier}
         return data
 
     def get_user(self, user, password):
         user = self.users.find_one({'username': user})
         if user['password'] == password:
-            return {'username': user['username'], 'wallet': user['wallet']}
+            return {'username': user['username'], 'wallet': user['wallet'], 'guid': user['guid']}
         else:
             return {'error': 'Invalid authentication'}
 
@@ -164,7 +164,8 @@ class MongoDB():
             pass2['seat'] = seat1
             passes.append(pass1)
             passes.append(pass2)
-            self.flights.replace_one({'_id': flightid}, passes)
+            searched['passengers'] = passes
+            self.flights.replace_one({'_id': flightid}, searched)
 
 
     def transact(self, flightid, offerid, txn_id):
@@ -195,14 +196,9 @@ class MongoDB():
             if not tooffers and not fromoffers:
                 return {'Failed to invalidate outstanding transactions'}
             # Actually switch the seats
-            '''
-            self._swap_seats(flightid, )
-            to = offer['to']
-            fr = offer['fr']
-            temp = to['seat']
-            to['seat'] = fr['seat']
-            fr['seat'] = temp
-            '''
+            passenger1 = self.get_passenger(flightid, offer['to'])
+            passenger2 = self.get_passenger(flightid, offer['fr'])
+            self._swap_seats(flightid, passenger1, passenger2)
             # Update state change. Not sure how we're gonna do that one....
             return {'success': 'Transaction completed (txn {})'.format(txn_id)}
         else:
