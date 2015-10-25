@@ -12,3 +12,6 @@ class OfferListAPI(Resource):
         result = db.get_offer(flightid, offerid)
         return result
 
+    def delete(self, flightid, offerid):
+        result = db.delete_offer(flightid, offerid)
+        return result

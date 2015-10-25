@@ -30,13 +30,28 @@ class MongoDB():
         else:
             return {'error': 'Could not find flight'}
 
-    def get_offer(self, flight_id, offer_id):
+    def delete_passenger(self, flight_id, pass_id):
         searched = self.flights.find_one({'_id': flight_id})
         if searched:
-            for s in searched['offers']:
-                if s['offerid'] == offer_id:
-                    return s
-            return {'error': 'Could not find offer with this id'}
+            for p in searched['passengers']:
+                if p['_id'] == pass_id:
+                    try:
+                        searched['passengers'].remove(p)
+                    except ValueError as v:
+                        return {'error': v}
+                    self.flights.replace_one({'_id': flight_id}, searched)
+                    return {'removed': pass_id}
+            return {'error': 'Could not find passenger'}
+        else:
+            return {'error': 'Could not find flight'}
+
+    def get_passenger(self, flight_id, pass_id):
+        searched = self.flights.find_one({'_id': flight_id})
+        if searched:
+            for p in searched['passengers']:
+                if p['_id'] == pass_id:
+                    return p
+            return {'error': 'Could not find passenger'}
         else:
             return {'error': 'Could not find flight'}
 
@@ -47,6 +62,31 @@ class MongoDB():
             searched['passengers'].append(new_pass)
             self.flights.replace_one({'_id': flight_id}, searched)
             return searched
+        else:
+            return {'error': 'Could not find flight'}
+
+    def delete_offer(self, flight_id, offerid):
+        searched = self.flights.find_one({'_id': flight_id})
+        if searched:
+            for o in searched['offers']:
+                if o['offerid'] == offerid:
+                    try:
+                        searched['offers'].remove(o)
+                    except ValueError as v:
+                        return {'error': v}
+                    self.flights.replace_one({'_id': flight_id}, searched)
+                    return {'removed': offerid}
+            return {'error': 'Could not find offer'}
+        else:
+            return {'error': 'Could not find flight'}
+
+    def get_offer(self, flight_id, offer_id):
+        searched = self.flights.find_one({'_id': flight_id})
+        if searched:
+            for s in searched['offers']:
+                if s['offerid'] == offer_id:
+                    return s
+            return {'error': 'Could not find offer with this id'}
         else:
             return {'error': 'Could not find flight'}
 
