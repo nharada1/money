@@ -114,7 +114,7 @@ class MongoDB():
         else:
             return {'error': 'Could not find flight'}
 
-    def add_offer(self, flight_id, to, fr, price):
+    def add_offer(self, flight_id, to, fr, price, fr_id, fr_pw):
         searched = self.flights.find_one({'_id': flight_id})
         if searched:
             # Ensure to and from are valid users on this plane
@@ -129,7 +129,14 @@ class MongoDB():
 
             to_seat = [v['seat'] for v in searched['passengers'] if v['_id']==to]
             from_seat = [v['seat'] for v in searched['passengers'] if v['_id']==fr]
-            new_offer = {'offerid': offerid, 'to': to, 'to_seat': to_seat[0], 'fr': fr, 'from_seat': from_seat[0], 'price': price}
+            new_offer = {'offerid': offerid,
+                         'to': to,
+                         'to_seat': to_seat[0],
+                         'fr': fr,
+                         'from_seat': from_seat[0],
+                         'price': price,
+                         'from_id': fr_id,
+                         'from_pw': fr_pw}
             searched['offers'].append(new_offer)
             self.flights.replace_one({'_id': flight_id}, searched)
             return offerid

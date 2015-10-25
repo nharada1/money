@@ -11,12 +11,14 @@ class OfferAPI(Resource):
         self.reqparse.add_argument('to', type=str, location='json', required=True)
         self.reqparse.add_argument('from', type=str, location='json', required=True)
         self.reqparse.add_argument('price', type=int, location='json', required=True)
+        self.reqparse.add_argument('from_id', type=str, location='json', required=True)
+        self.reqparse.add_argument('from_pw', type=str, location='json', required=True)
         super(OfferAPI, self).__init__()
 
     def post(self):
         args = self.reqparse.parse_args()
         try:
-            offer = db.add_offer(args['flight_id'], args['to'], args['from'], args['price'])
+            offer = db.add_offer(args['flight_id'], args['to'], args['from'], args['price'], args['from_id'], args['from_pw'])
 
             return offer
         except Exception as e:
