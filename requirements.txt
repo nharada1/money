@@ -2,7 +2,7 @@ aniso8601==1.0.0
 blockchain==1.1.2 
 Flask==0.10.1
 Flask-Cors==2.1.0
-Flask-HTTPAuth=2.7.0
+Flask-HTTPAuth==2.7.0
 Flask-RESTful==0.3.4
 Flask-SocketIO==1.0b1
 Jinja2==2.8
