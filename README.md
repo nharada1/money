@@ -5,7 +5,7 @@ Reportr uses an HTTP REST API to track events. Datas are always JSON encoded.
 | Endpoint | HTTP Method | Description | Arguments |
 | -------- | ----------- | ----------- | --------- |
 | /api/flights/:flightid | GET | Returns full flight JSON object with this ID |  |
-| /api/flight | POST | Add a new flight | `<string>airline`,`<int>flight_no`,`<string>date`,`<string>from`,`<string>to`,`<string>takeoff`,`<string>landing`,`<string>model`,`<int>first_rows`,`<int>econ_rows`|
+| /api/flight | POST | Add a new flight | `<string>flight_id`  |
 | /api/passenger | POST | Add a new passenger to a flight | `<string>flight_id`, `<string>passenger_id` , `<int>row`, `<int>col`|
 | /api/passengers/:flightid/:passengerid | GET | Get passenger info by ID | |
 | /api/passengers/:flightid/:passengerid | DELETE| Remove a passenger from a flight | |

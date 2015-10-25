@@ -10,7 +10,7 @@ class OfferAPI(Resource):
         self.reqparse.add_argument('flight_id', type=str, location='json', required=True)
         self.reqparse.add_argument('to', type=str, location='json', required=True)
         self.reqparse.add_argument('from', type=str, location='json', required=True)
-        self.reqparse.add_argument('price', type=int, location='json', required=True)
+        self.reqparse.add_argument('price', type=float, location='json', required=True)
         self.reqparse.add_argument('from_id', type=str, location='json', required=True)
         self.reqparse.add_argument('from_pw', type=str, location='json', required=True)
         super(OfferAPI, self).__init__()
