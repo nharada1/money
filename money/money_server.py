@@ -2,7 +2,10 @@ from flask import Flask, make_response, jsonify
 from flask.ext.restful import Api
 from flask.ext.cors import CORS
 
-from money.resources import FlightAPI, FlightListAPI, UserAPI, OfferAPI, OfferListAPI, UserDenseListAPI, UserListAPI
+from money.resources import FlightAPI, FlightListAPI
+from money.resources import UserAPI, UserDenseListAPI, UserListAPI
+from money.resources import OfferAPI, OfferListAPI
+from money.resources import TransactionAPI
 
 
 def init_app():
@@ -16,6 +19,7 @@ def init_app():
     api.add_resource(UserDenseListAPI, '/api/dense_passenger/<string:flightid>', endpoint='dense_passenger')
     api.add_resource(OfferAPI, '/api/offer', endpoint='offer')
     api.add_resource(OfferListAPI, '/api/flights/<string:flightid>/<string:offerid>', endpoint='offers')
+    api.add_resource(TransactionAPI, '/api/transaction', endpoint='transact')
     return money_app
 
 money_app = init_app()

@@ -20,5 +20,4 @@ class UserAPI(Resource):
             return flight
         except Exception as e:
             print(e)
-
-        return {'error': e}
+            return {'error': e}

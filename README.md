@@ -13,3 +13,4 @@ Reportr uses an HTTP REST API to track events. Datas are always JSON encoded.
 | /api/flights/:flightid/:offerid | GET | Get offer information via ID |  |
 | /api/flights/:flightid/:offerid | DELETE | Delete an offer from a flight |  |
 | /api/dense_passenger/:flightid| GET | Get a dense version of the passenger matrix |  |
+| /api/transaction | POST | Run a transaction in the database | `<string>flight_id`, `<string>offier_id`, `<string>txn_id` |

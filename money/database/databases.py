@@ -1,7 +1,10 @@
-import uuid
 import pymongo
 import os
-from datetime import datetime
+
+from blockchain import blockexplorer
+from blockchain.exceptions import APIException
+
+SEAT_COLS = 6
 
 
 class MongoDB():
@@ -40,6 +43,7 @@ class MongoDB():
                     except ValueError as v:
                         return {'error': v}
                     self.flights.replace_one({'_id': flight_id}, searched)
+                    self._invalidate_offers(flight_id, pass_id)
                     return {'removed': pass_id}
             return {'error': 'Could not find passenger'}
         else:
@@ -58,6 +62,10 @@ class MongoDB():
     def add_passenger(self, flight_id, pass_id, seat_row, seat_col):
         searched = self.flights.find_one({'_id': flight_id})
         if searched:
+            if seat_row >= searched['first_rows'] + searched['econ_rows'] or seat_row < 0:
+                return {'error': 'Invalid row'}
+            if seat_col > SEAT_COLS or seat_col < 0:
+                return {'error': 'Invalid col'}
             new_pass = {'_id': pass_id, 'seat': [seat_row, seat_col]}
             searched['passengers'].append(new_pass)
             self.flights.replace_one({'_id': flight_id}, searched)
@@ -107,5 +115,52 @@ class MongoDB():
             searched['offers'].append(new_offer)
             self.flights.replace_one({'_id': flight_id}, searched)
             return offerid
+        else:
+            return {'error': 'Could not find flight'}
+
+    def _invalidate_offers(self, flight_id, passenger):
+        """Invalidate all other offers that are going to or from a specific person. We need to do this
+        when a transaction goes through, or when a person leaves the server. Return True if we successfully
+        invalidate, false if we don't"""
+        searched = self.flights.find_one({'_id': flight_id})
+        if searched:
+            offers = searched['offers']
+            for offer in offers:
+                if offer['to'] == passenger or offer['fr'] == passenger:
+                    offers.remove(offer)
+            searched['offers'] = offers
+            self.flights.replace_one({'_id': flight_id}, searched)
+            return True
+        return False
+
+
+    def transact(self, flightid, offerid, txn_id):
+        """Run a transaction. Doing this requires the following to happen:
+        1. Validate the offer pending
+        2. Check that the txn_id is indeed present in the blockchain (txn has taken place)
+        3. Remove the offer from the offer list
+        4. Invalidate all other offers for the "to" user (since they've moved seats now)
+        5. Update state changed
+        """
+        searched = self.flights.find_one({'_id': flightid})
+        if searched:
+            # Validate offer. Remember offers are unique (or at least are supposed to be)
+            offer = self.get_offer(flightid, offerid)
+            if 'error' in offer:
+                return offer
+            # Check that the transaction has happened
+            try:
+                block = blockexplorer.get_tx(txn_id)
+            except APIException as e:
+                return {'error': 'Bitcoin transaction not found'}
+            # Remove offer from the list. We're gonna (unwisely) assume this works with no problems
+            self.delete_offer(flightid, offerid)
+            # Invalidate other offers.
+            tooffers = self._invalidate_offers(flightid, offer['to'])
+            fromoffers = self._invalidate_offers(flightid, offer['fr'])
+            if not tooffers and not fromoffers:
+                return {'Failed to invalidate outstanding transactions'}
+            # Update state change. Not sure how we're gonna do that one....
+            return {'success': 'Transaction completed (txn {})'.format(txn_id)}
         else:
             return {'error': 'Could not find flight'}

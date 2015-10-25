@@ -20,5 +20,4 @@ class OfferAPI(Resource):
             return offer
         except Exception as e:
             print(e)
-
-        return {'error': e}
+            return {'error': e}

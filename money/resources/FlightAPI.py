@@ -23,8 +23,9 @@ class FlightAPI(Resource):
         args = self.reqparse.parse_args()
         try:
             new_id = db.new_flight(args)
+            return {'id': new_id}
         except Exception as e:
             print(e)
+            return {'error': e}
 
-        return {'id': new_id}
 
