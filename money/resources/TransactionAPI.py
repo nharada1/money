@@ -18,7 +18,6 @@ class TransactionAPI(Resource):
             result = db.transact(args['flight_id'], args['offer_id'], args['txn_id'])
             return result
         except Exception as e:
-            raise
             print(e)
             return {'error': e}
 

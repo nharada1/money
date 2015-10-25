@@ -1,7 +1,7 @@
 import pymongo
 import os
 
-from blockchain import blockexplorer
+from blockchain import blockexplorer, createwallet
 from blockchain.exceptions import APIException
 
 SEAT_COLS = 6
@@ -12,12 +12,28 @@ class MongoDB():
         """MongoDB bindings"""
         self.uri = os.environ.get('MONGOLAB_URI')
         self.flights = None
+        self.users = None
         self.init_connection()
 
     def init_connection(self):
         client = pymongo.MongoClient(self.uri)
         default_db = client.get_default_database()
         self.flights = default_db.flights
+        self.users = default_db.users
+
+    def new_user(self, user, hashed_pass):
+        new_wallet = createwallet.create_wallet(hashed_pass, os.environ.get('BLOCKCHAIN_KEY'))
+        data = {'username': user, 'password': hashed_pass, 'wallet': new_wallet.address}
+        self.users.insert_one(data)
+        data = {'username': user, 'password': hashed_pass, 'wallet': new_wallet.address}
+        return data
+
+    def get_user(self, user, password):
+        user = self.users.find_one({'username': user})
+        if user['password'] == password:
+            return {'username': user['username'], 'wallet': user['wallet']}
+        else:
+            return {'error': 'Invalid authentication'}
 
     def new_flight(self, flight_data):
         flight_data['_id'] = "{}{}".format(flight_data['airline'], flight_data['flight_no'])
