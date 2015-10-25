@@ -20,7 +20,6 @@ class FlightAPI(Resource):
     def post(self):
         args = self.reqparse.parse_args()
         try:
-            print(args)
             new_id = db.new_flight(args)
         except Exception as e:
             print(e)
