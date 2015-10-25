@@ -31,7 +31,7 @@ class MongoDB():
     def get_user(self, user, password):
         user = self.users.find_one({'username': user})
         if user['password'] == password:
-            return {'username': user['username'], 'wallet': user['wallet'], 'guid': user['guid']}
+            return {'username': user['username'], 'password': user['password'], 'wallet': user['wallet'], 'guid': user['guid']}
         else:
             return {'error': 'Invalid authentication'}
 
