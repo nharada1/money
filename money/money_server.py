@@ -9,8 +9,6 @@ from money.resources import UserAPI, UserDenseListAPI, UserListAPI
 from money.resources import OfferAPI, OfferListAPI
 from money.resources import TransactionAPI, AuthAPI
 
-auth = HTTPBasicAuth()
-
 
 def init_app():
     money_app = Flask(__name__)

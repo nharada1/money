@@ -127,7 +127,9 @@ class MongoDB():
             if offerid in offerids:
                 return {'error': 'This offer is already in the database'}
 
-            new_offer = {'offerid': offerid, 'to': to, 'fr': fr, 'price': price}
+            to_seat = [v['seat'] for v in searched['passengers'] if v['_id']==to]
+            from_seat = [v['seat'] for v in searched['passengers'] if v['_id']==fr]
+            new_offer = {'offerid': offerid, 'to': to, 'to_seat': to_seat[0], 'fr': fr, 'from_seat': from_seat[0], 'price': price}
             searched['offers'].append(new_offer)
             self.flights.replace_one({'_id': flight_id}, searched)
             return offerid
@@ -150,13 +152,29 @@ class MongoDB():
         return False
 
 
+    def _swap_seats(self, flightid, pass1, pass2):
+        searched = self.flights.find_one({'_id': flightid})
+        if searched:
+            passes = searched['passengers']
+            seat1 = pass1['seat']
+            seat2 = pass2['seat']
+            passes.remove(pass1)
+            passes.remove(pass2)
+            pass1['seat'] = seat2
+            pass2['seat'] = seat1
+            passes.append(pass1)
+            passes.append(pass2)
+            self.flights.replace_one({'_id': flightid}, passes)
+
+
     def transact(self, flightid, offerid, txn_id):
         """Run a transaction. Doing this requires the following to happen:
         1. Validate the offer pending
         2. Check that the txn_id is indeed present in the blockchain (txn has taken place)
         3. Remove the offer from the offer list
         4. Invalidate all other offers for the "to" user (since they've moved seats now)
-        5. Update state changed
+        5. Switch seats
+        6. Update state changed
         """
         searched = self.flights.find_one({'_id': flightid})
         if searched:
@@ -176,6 +194,15 @@ class MongoDB():
             fromoffers = self._invalidate_offers(flightid, offer['fr'])
             if not tooffers and not fromoffers:
                 return {'Failed to invalidate outstanding transactions'}
+            # Actually switch the seats
+            '''
+            self._swap_seats(flightid, )
+            to = offer['to']
+            fr = offer['fr']
+            temp = to['seat']
+            to['seat'] = fr['seat']
+            fr['seat'] = temp
+            '''
             # Update state change. Not sure how we're gonna do that one....
             return {'success': 'Transaction completed (txn {})'.format(txn_id)}
         else:

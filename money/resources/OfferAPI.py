@@ -17,6 +17,7 @@ class OfferAPI(Resource):
         args = self.reqparse.parse_args()
         try:
             offer = db.add_offer(args['flight_id'], args['to'], args['from'], args['price'])
+
             return offer
         except Exception as e:
             print(e)
